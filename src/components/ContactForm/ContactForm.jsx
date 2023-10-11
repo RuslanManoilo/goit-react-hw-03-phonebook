@@ -1,63 +1,55 @@
-import { Component } from "react";
 import { nanoid } from "nanoid";
-import { Form, FormBtn, FormInput, FormLabel } from "./ContactForm.styled";
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { ErrorNotification, FormBtn, FormInput, FormLabel, FormWrapper } from "./ContactForm.styled";
+ 
 
+const formSchema = Yup.object().shape({
+    name: Yup.string()
+        .min(2, 'Too Short!')
+        .required('This field is required!'),
+    number: Yup.string()
+        .min(4, 'Too Short!')
+        .required('This field is required!'),
+});
 
-class ContactForm extends Component {
-    state = {
-        name: '',
-        number: ''
-    }
-
-    onChangeForm = ({target}) => {
-        this.setState({[target.name]: target.value});
-    };
-    
-    getName = (evt) => {
-        evt.preventDefault();
-      
-        this.props.getContact({
-            id: nanoid(),
-            name: this.state.name,
-            number: this.state.number
-        });
-
-        this.setState({
-            name: '',
-            number: ''
-        });
-    };
-    
-    render() {
-        return (
-            <Form 
-            onSubmit={this.getName}
-            >
-                <FormLabel htmlFor="contactFormInput">Name</FormLabel>
-                <FormInput 
-                    name="name" 
-                    id="contactFormInput" 
-                    type="text" 
-                    required 
-                    onChange={this.onChangeForm}
-                    value={this.state.name}
+export const ContactForm = ({getContact}) => {
+    return (
+        <Formik
+            initialValues={{
+                name: '',
+                number: '',
+            }}
+            validationSchema={formSchema}
+            onSubmit={(values, actions) => {
+                getContact({
+                    id: nanoid(),
+                    name: values.name,
+                    number: values.number,
+                });
+                actions.resetForm();
+            }}
+        >
+            <FormWrapper>
+                <FormLabel htmlFor="contactFormikInput">Name</FormLabel>
+                <FormInput
+                    name="name"
+                    id="contactFormikInput"
+                    type="text"
+                    
                 />
+                <ErrorNotification name="name" component="div" />
 
-                <FormLabel htmlFor="contactFormNumber">Number</FormLabel>
-                <FormInput 
+                <FormLabel htmlFor="contactFormikNumber">Number</FormLabel>
+                <FormInput
                     name="number"
-                    id="contactFormNumber" 
-                    type="tel" 
-                    required
-                    onChange={this.onChangeForm}
-                    value={this.state.number}
+                    id="contactFormikNumber"
+                    type="tel"
                 />
-    
-                <FormBtn>Add contact</FormBtn>
-            </Form>
-        )
-    }
-}
+                <ErrorNotification name="number" component="div" />
 
-
-export default ContactForm;
+                <FormBtn type="submit">Add contact</FormBtn>
+            </FormWrapper>
+        </Formik>
+    );
+};
