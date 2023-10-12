@@ -11,6 +11,21 @@ class App extends Component {
     filter: ''
   };
 
+  componentDidMount() {
+    const savedContacts = localStorage.getItem("contacts-list");
+    if (savedContacts !== null) {
+      this.setState({
+        contacts: JSON.parse(savedContacts)
+      })
+    }
+  };
+
+  componentDidUpdate(prevProp, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem("contacts-list", JSON.stringify(this.state.contacts))
+    }
+  };
+
   getContact = (contactObj) => {
     const isExist = this.state.contacts.some(contact => contact.name.toLowerCase() === contactObj.name.toLowerCase());
 
